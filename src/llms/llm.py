@@ -12,6 +12,11 @@ from langchain_core.rate_limiters import BaseRateLimiter, InMemoryRateLimiter
 from langchain_deepseek import ChatDeepSeek
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
+from langchain_openai.chat_models.base import (
+    WellKnownTools,
+    _convert_to_openai_response_format,
+    convert_to_openai_tool,
+)
 from pydantic import ConfigDict
 
 from src.config import load_yaml_config
@@ -185,6 +190,64 @@ class RateLimitedChatModel(BaseChatModel):
             messages, stop=stop, run_manager=run_manager, **kwargs
         ):
             yield chunk
+
+    def bind_tools(
+        self,
+        tools,
+        *,
+        tool_choice=None,
+        strict=None,
+        parallel_tool_calls=None,
+        response_format=None,
+        **kwargs: Any,
+    ):
+        if parallel_tool_calls is not None:
+            kwargs["parallel_tool_calls"] = parallel_tool_calls
+
+        formatted_tools = [
+            convert_to_openai_tool(tool, strict=strict) for tool in tools
+        ]
+        tool_names = []
+        for tool in formatted_tools:
+            if "function" in tool:
+                tool_names.append(tool["function"].get("name"))
+            elif "name" in tool:
+                tool_names.append(tool.get("name"))
+
+        if tool_choice:
+            if isinstance(tool_choice, str):
+                if tool_choice in tool_names:
+                    tool_choice = {
+                        "type": "function",
+                        "function": {"name": tool_choice},
+                    }
+                elif tool_choice in WellKnownTools:
+                    tool_choice = {"type": tool_choice}
+                elif tool_choice == "any":
+                    tool_choice = "required"
+            elif isinstance(tool_choice, bool):
+                tool_choice = "required"
+            elif isinstance(tool_choice, dict):
+                pass
+            else:
+                raise ValueError(
+                    "Unrecognized tool_choice type. Expected str, bool or dict. "
+                    f"Received: {tool_choice}"
+                )
+            kwargs["tool_choice"] = tool_choice
+
+        if response_format:
+            if (
+                isinstance(response_format, dict)
+                and response_format.get("type") == "json_schema"
+                and "schema" in response_format.get("json_schema", {})
+            ):
+                response_format = response_format["json_schema"].get("schema")
+            kwargs["response_format"] = _convert_to_openai_response_format(
+                response_format
+            )
+
+        return super().bind(tools=formatted_tools, **kwargs)
 
 
 def _get_config_file_path() -> str:
