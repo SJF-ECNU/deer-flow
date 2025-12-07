@@ -24,9 +24,41 @@ logger = logging.getLogger(__name__)
 _llm_cache: dict[LLMType, BaseChatModel] = {}
 _rate_limiter_cache: dict[LLMType, BaseRateLimiter] = {}
 
-DEFAULT_RATE_LIMIT_REQUESTS_PER_SECOND = 3.0
-DEFAULT_RATE_LIMIT_CHECK_INTERVAL = 0.1
-DEFAULT_RATE_LIMIT_BUCKET_SIZE = 3.0
+
+def _get_env_rate_limit_default(env_key: str, fallback: float) -> float:
+    raw_value = os.getenv(env_key)
+    if raw_value is None:
+        return fallback
+    try:
+        value = float(raw_value)
+    except (TypeError, ValueError):
+        logger.warning(
+            "Invalid global rate limit value %s=%s, falling back to %.2f",
+            env_key,
+            raw_value,
+            fallback,
+        )
+        return fallback
+    if value <= 0:
+        logger.warning(
+            "Non-positive global rate limit value %s=%.2f, falling back to %.2f",
+            env_key,
+            value,
+            fallback,
+        )
+        return fallback
+    return value
+
+
+DEFAULT_RATE_LIMIT_REQUESTS_PER_SECOND = _get_env_rate_limit_default(
+    "RATE_LIMIT_DEFAULT_REQUESTS_PER_SECOND", 3.0
+)
+DEFAULT_RATE_LIMIT_CHECK_INTERVAL = _get_env_rate_limit_default(
+    "RATE_LIMIT_DEFAULT_CHECK_INTERVAL", 0.1
+)
+DEFAULT_RATE_LIMIT_BUCKET_SIZE = _get_env_rate_limit_default(
+    "RATE_LIMIT_DEFAULT_BUCKET_SIZE", 3.0
+)
 
 # Allowed LLM configuration keys to prevent unexpected parameters from being passed
 # to LLM constructors (Issue #411 - SEARCH_ENGINE warning fix)
@@ -186,7 +218,7 @@ def _get_env_llm_conf(llm_type: str) -> Dict[str, Any]:
 
 
 def _coerce_positive_float(
-    value: Any, key: str, llm_type: LLMType
+    value: Any, key: str, llm_type: str
 ) -> float | None:
     if value is None:
         return None

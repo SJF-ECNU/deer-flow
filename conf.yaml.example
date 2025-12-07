@@ -17,6 +17,7 @@ BASIC_MODEL:
   # rate_limit_requests_per_second: 3 # Smooths bursts to avoid provider throttling
   # rate_limit_max_bucket_size: 3 # Controls allowed burst size before throttling kicks in
   # rate_limit_check_every_n_seconds: 0.1 # How frequently to poll when waiting for a slot
+  # Global defaults can also be set with envs: RATE_LIMIT_DEFAULT_REQUESTS_PER_SECOND, RATE_LIMIT_DEFAULT_BUCKET_SIZE, RATE_LIMIT_DEFAULT_CHECK_INTERVAL
 
 # Local model configuration example:
 
@@ -49,6 +50,7 @@ BASIC_MODEL:
 #   rate_limit_requests_per_second: 3 # Smooths bursts to avoid provider throttling
 #   rate_limit_max_bucket_size: 3 # Controls allowed burst size before throttling kicks in
 #   rate_limit_check_every_n_seconds: 0.1 # How frequently to poll when waiting for a slot
+#   # Global defaults can also be set with envs: RATE_LIMIT_DEFAULT_REQUESTS_PER_SECOND, RATE_LIMIT_DEFAULT_BUCKET_SIZE, RATE_LIMIT_DEFAULT_CHECK_INTERVAL
 
 
 # OTHER SETTINGS:
