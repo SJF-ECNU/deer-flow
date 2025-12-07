@@ -426,9 +426,11 @@ def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> BaseChatMod
     for key in unexpected_keys:
         removed_value = merged_conf.pop(key)
         logger.warning(
-            f"Removed unexpected LLM configuration key '{key}'. "
-            f"This key is not a valid LLM parameter and may have been placed in the wrong section of conf.yaml. "
-            f"Valid LLM config keys include: model, api_key, base_url, max_retries, temperature, etc."
+            "Removed unexpected LLM configuration key '%s'. "
+            "This key is not a valid LLM parameter and may have been placed in "
+            "the wrong section of conf.yaml. Valid LLM config keys include: "
+            "model, api_key, base_url, max_retries, temperature, etc.",
+            key,
         )
 
     # Remove unnecessary parameters when initializing the client
