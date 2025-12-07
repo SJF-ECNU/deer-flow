@@ -126,7 +126,9 @@ class TestValidateAndFixPlanStepTypeRepair:
         result = validate_and_fix_plan(plan)
 
         assert result["steps"][0]["step_type"] == "research"
-        assert result["steps"][1]["step_type"] == "processing"  # Should remain unchanged
+        assert (
+            result["steps"][1]["step_type"] == "processing"
+        )  # Should remain unchanged
         assert result["steps"][2]["step_type"] == "research"
 
     def test_preserve_explicit_step_type(self):
@@ -171,7 +173,10 @@ class TestValidateAndFixPlanStepTypeRepair:
             # Should log repair operation
             mock_logger.info.assert_called()
             # Check that any of the info calls contains "Repaired missing step_type"
-            assert any("Repaired missing step_type" in str(call) for call in mock_logger.info.call_args_list)
+            assert any(
+                "Repaired missing step_type" in str(call)
+                for call in mock_logger.info.call_args_list
+            )
 
     def test_non_dict_plan_returns_unchanged(self):
         """Test that non-dict plans are returned unchanged."""
@@ -366,6 +371,7 @@ class TestValidateAndFixPlanIntegration:
         # Issue #677: non-search steps now default to 'analysis' instead of 'processing'
         assert result["steps"][1]["step_type"] == "analysis"
         assert result["steps"][1]["need_search"] is False
+
 
 class TestValidateAndFixPlanIssue650:
     """Specific tests for Issue #650 scenarios."""

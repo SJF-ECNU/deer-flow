@@ -29,6 +29,7 @@ class TestToolInterceptorIntegration:
 
     def test_agent_creation_with_tool_interrupts(self):
         """Test creating an agent with tool interrupts configured."""
+
         @tool
         def search_tool(query: str) -> str:
             """Search the web."""
@@ -42,11 +43,13 @@ class TestToolInterceptorIntegration:
         tools = [search_tool, db_tool]
 
         # Create agent with interrupts on db_tool only
-        with patch("src.agents.agents.create_react_agent") as mock_create, \
-             patch("src.agents.agents.get_llm_by_type") as mock_llm:
+        with (
+            patch("src.agents.agents.create_react_agent") as mock_create,
+            patch("src.agents.agents.get_llm_by_type") as mock_llm,
+        ):
             mock_create.return_value = MagicMock()
             mock_llm.return_value = MagicMock()
-            
+
             agent = create_agent(
                 agent_name="test_agent",
                 agent_type="researcher",
@@ -104,6 +107,7 @@ class TestToolInterceptorIntegration:
 
     def test_multiple_tools_selective_interrupt(self):
         """Test that only specified tools trigger interrupts."""
+
         @tool
         def tool_a(x: str) -> str:
             """Tool A"""
@@ -142,6 +146,7 @@ class TestToolInterceptorIntegration:
 
     def test_interrupt_with_user_approval(self):
         """Test interrupt flow with user approval."""
+
         @tool
         def sensitive_tool(action: str) -> str:
             """A sensitive tool."""
@@ -160,6 +165,7 @@ class TestToolInterceptorIntegration:
 
     def test_interrupt_with_user_rejection(self):
         """Test interrupt flow with user rejection."""
+
         @tool
         def sensitive_tool(action: str) -> str:
             """A sensitive tool."""
@@ -180,6 +186,7 @@ class TestToolInterceptorIntegration:
 
     def test_interrupt_message_contains_tool_info(self):
         """Test that interrupt message contains tool name and input."""
+
         @tool
         def db_query_tool(query: str) -> str:
             """Database query tool."""
@@ -201,6 +208,7 @@ class TestToolInterceptorIntegration:
 
     def test_tool_wrapping_preserves_functionality(self):
         """Test that tool wrapping preserves original tool functionality."""
+
         @tool
         def simple_tool(text: str) -> str:
             """Process text."""
@@ -214,6 +222,7 @@ class TestToolInterceptorIntegration:
 
     def test_tool_wrapping_preserves_tool_metadata(self):
         """Test that tool wrapping preserves tool name and description."""
+
         @tool
         def my_special_tool(x: str) -> str:
             """This is my special tool description."""
@@ -227,6 +236,7 @@ class TestToolInterceptorIntegration:
 
     def test_multiple_interrupts_in_sequence(self):
         """Test handling multiple tool interrupts in sequence."""
+
         @tool
         def tool_one(x: str) -> str:
             """Tool one."""
@@ -243,9 +253,7 @@ class TestToolInterceptorIntegration:
             return f"Three: {x}"
 
         tools = [tool_one, tool_two, tool_three]
-        wrapped_tools = wrap_tools_with_interceptor(
-            tools, ["tool_one", "tool_two"]
-        )
+        wrapped_tools = wrap_tools_with_interceptor(tools, ["tool_one", "tool_two"])
 
         with patch("src.agents.tool_interceptor.interrupt") as mock_interrupt:
             mock_interrupt.return_value = "approved"
@@ -268,6 +276,7 @@ class TestToolInterceptorIntegration:
 
     def test_empty_interrupt_list_no_interrupts(self):
         """Test that empty interrupt list doesn't trigger interrupts."""
+
         @tool
         def test_tool(x: str) -> str:
             """Test tool."""
@@ -281,6 +290,7 @@ class TestToolInterceptorIntegration:
 
     def test_none_interrupt_list_no_interrupts(self):
         """Test that None interrupt list doesn't trigger interrupts."""
+
         @tool
         def test_tool(x: str) -> str:
             """Test tool."""
@@ -294,6 +304,7 @@ class TestToolInterceptorIntegration:
 
     def test_case_sensitive_tool_name_matching(self):
         """Test that tool name matching is case-sensitive."""
+
         @tool
         def MyTool(x: str) -> str:
             """A tool."""
@@ -317,6 +328,7 @@ class TestToolInterceptorIntegration:
 
     def test_tool_error_handling(self):
         """Test handling of tool errors during execution."""
+
         @tool
         def error_tool(x: str) -> str:
             """A tool that raises an error."""
@@ -353,9 +365,9 @@ class TestToolInterceptorIntegration:
 
         for keyword in approval_keywords:
             result = ToolInterceptor._parse_approval(keyword)
-            assert (
-                result is True
-            ), f"Keyword '{keyword}' should be approved but got {result}"
+            assert result is True, (
+                f"Keyword '{keyword}' should be approved but got {result}"
+            )
 
     def test_rejection_keywords_comprehensive(self):
         """Test that rejection keywords are recognized."""
@@ -374,12 +386,13 @@ class TestToolInterceptorIntegration:
 
         for keyword in rejection_keywords:
             result = ToolInterceptor._parse_approval(keyword)
-            assert (
-                result is False
-            ), f"Keyword '{keyword}' should be rejected but got {result}"
+            assert result is False, (
+                f"Keyword '{keyword}' should be rejected but got {result}"
+            )
 
     def test_interrupt_with_complex_tool_input(self):
         """Test interrupt with complex tool input types."""
+
         @tool
         def complex_tool(data: str) -> str:
             """A tool with complex input."""
@@ -391,9 +404,7 @@ class TestToolInterceptorIntegration:
             interceptor = ToolInterceptor(["complex_tool"])
             wrapped = ToolInterceptor.wrap_tool(complex_tool, interceptor)
 
-            complex_input = {
-                "data": "complex data with nested info"
-            }
+            complex_input = {"data": "complex data with nested info"}
 
             result = wrapped.invoke(complex_input)
 
@@ -424,6 +435,7 @@ class TestToolInterceptorIntegration:
 
     def test_wrap_tools_with_interceptor_logging(self):
         """Test that tool wrapping is logged."""
+
         @tool
         def test_tool(x: str) -> str:
             """Test."""
@@ -436,6 +448,7 @@ class TestToolInterceptorIntegration:
 
     def test_interrupt_resolution_with_empty_feedback(self):
         """Test interrupt resolution with empty feedback."""
+
         @tool
         def test_tool(x: str) -> str:
             """Test."""
@@ -455,6 +468,7 @@ class TestToolInterceptorIntegration:
 
     def test_interrupt_resolution_with_none_feedback(self):
         """Test interrupt resolution with None feedback."""
+
         @tool
         def test_tool(x: str) -> str:
             """Test."""

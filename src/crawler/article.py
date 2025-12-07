@@ -18,12 +18,12 @@ class Article:
         markdown = ""
         if including_title:
             markdown += f"# {self.title}\n\n"
-        
+
         if self.html_content is None or not str(self.html_content).strip():
             markdown += "*No content available*\n"
         else:
             markdown += md(self.html_content)
-        
+
         return markdown
 
     def to_message(self) -> list[dict]:
@@ -31,10 +31,10 @@ class Article:
 
         content: list[dict[str, str]] = []
         markdown = self.to_markdown()
-        
+
         if not markdown or not markdown.strip():
             return [{"type": "text", "text": "No content available"}]
-        
+
         parts = re.split(image_pattern, markdown)
 
         for i, part in enumerate(parts):
@@ -49,5 +49,5 @@ class Article:
         # If after processing all parts, content is still empty, provide a fallback message.
         if not content:
             content = [{"type": "text", "text": "No content available"}]
-        
+
         return content

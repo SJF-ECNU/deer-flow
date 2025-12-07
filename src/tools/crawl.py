@@ -14,13 +14,14 @@ from .decorators import log_io
 
 logger = logging.getLogger(__name__)
 
+
 def is_pdf_url(url: Optional[str]) -> bool:
     """Check if the URL points to a PDF file."""
     if not url:
         return False
     parsed_url = urlparse(url)
     # Check if the path ends with .pdf (case insensitive)
-    return parsed_url.path.lower().endswith('.pdf')
+    return parsed_url.path.lower().endswith(".pdf")
 
 
 @tool
@@ -32,14 +33,16 @@ def crawl_tool(
     # Special handling for PDF URLs
     if is_pdf_url(url):
         logger.info(f"PDF URL detected, skipping crawling: {url}")
-        pdf_message = json.dumps({
-            "url": url,
-            "error": "PDF files cannot be crawled directly. Please download and view the PDF manually.",
-            "crawled_content": None,
-            "is_pdf": True
-        })
+        pdf_message = json.dumps(
+            {
+                "url": url,
+                "error": "PDF files cannot be crawled directly. Please download and view the PDF manually.",
+                "crawled_content": None,
+                "is_pdf": True,
+            }
+        )
         return pdf_message
-    
+
     try:
         crawler = Crawler()
         article = crawler.crawl(url)

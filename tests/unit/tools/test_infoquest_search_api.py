@@ -29,7 +29,7 @@ class TestInfoQuestAPIWrapper:
                                     {
                                         "title": "Test Title",
                                         "url": "https://example.com",
-                                        "desc": "Test description"
+                                        "desc": "Test description",
                                     }
                                 ],
                                 "top_stories": {
@@ -38,7 +38,7 @@ class TestInfoQuestAPIWrapper:
                                             "time_frame": "2 days ago",
                                             "title": "Test News",
                                             "url": "https://example.com/news",
-                                            "source": "Test Source"
+                                            "source": "Test Source",
                                         }
                                     ]
                                 },
@@ -46,10 +46,10 @@ class TestInfoQuestAPIWrapper:
                                     "items": [
                                         {
                                             "url": "https://example.com/image.jpg",
-                                            "alt": "Test image description"
+                                            "alt": "Test image description",
                                         }
                                     ]
-                                }
+                                },
                             }
                         }
                     }
@@ -76,7 +76,9 @@ class TestInfoQuestAPIWrapper:
         assert "site" not in call_args.kwargs["json"]
 
     @patch("src.tools.infoquest_search.infoquest_search_api.requests.post")
-    def test_raw_results_with_time_range_and_site(self, mock_post, wrapper, mock_response_data):
+    def test_raw_results_with_time_range_and_site(
+        self, mock_post, wrapper, mock_response_data
+    ):
         # Test search with time range and site filtering
         mock_response = Mock()
         mock_response.json.return_value = mock_response_data
@@ -104,6 +106,7 @@ class TestInfoQuestAPIWrapper:
     # Check if pytest-asyncio is available, otherwise mark for conditional skipping
     try:
         import pytest_asyncio
+
         _asyncio_available = True
     except ImportError:
         _asyncio_available = False
@@ -113,17 +116,21 @@ class TestInfoQuestAPIWrapper:
         # Skip only if pytest-asyncio is not installed
         if not self._asyncio_available:
             pytest.skip("pytest-asyncio is not installed")
-        
-        with patch('json.loads', return_value=mock_response_data):
+
+        with patch("json.loads", return_value=mock_response_data):
             original_method = InfoQuestAPIWrapper.raw_results_async
-            
-            async def mock_raw_results_async(self, query, time_range=0, site="", output_format="json"):
+
+            async def mock_raw_results_async(
+                self, query, time_range=0, site="", output_format="json"
+            ):
                 return mock_response_data["search_result"]
-            
+
             InfoQuestAPIWrapper.raw_results_async = mock_raw_results_async
-            
+
             try:
-                result = await wrapper.raw_results_async("test query", time_range=0, site="")
+                result = await wrapper.raw_results_async(
+                    "test query", time_range=0, site=""
+                )
                 assert result == mock_response_data["search_result"]
             finally:
                 InfoQuestAPIWrapper.raw_results_async = original_method
@@ -132,14 +139,16 @@ class TestInfoQuestAPIWrapper:
     async def test_raw_results_async_error(self, wrapper):
         if not self._asyncio_available:
             pytest.skip("pytest-asyncio is not installed")
-        
+
         original_method = InfoQuestAPIWrapper.raw_results_async
-        
-        async def mock_raw_results_async_error(self, query, time_range=0, site="", output_format="json"):
+
+        async def mock_raw_results_async_error(
+            self, query, time_range=0, site="", output_format="json"
+        ):
             raise Exception("Error 400: Bad Request")
-        
+
         InfoQuestAPIWrapper.raw_results_async = mock_raw_results_async_error
-        
+
         try:
             with pytest.raises(Exception, match="Error 400: Bad Request"):
                 await wrapper.raw_results_async("test query", time_range=0, site="")
@@ -182,7 +191,7 @@ class TestInfoQuestAPIWrapper:
                     "results": {
                         "organic": [],
                         "top_stories": {"items": []},
-                        "images": {"items": []}
+                        "images": {"items": []},
                     }
                 }
             }
@@ -201,13 +210,13 @@ class TestInfoQuestAPIWrapper:
                             {
                                 "title": "Test Title 1",
                                 "url": "https://example.com",
-                                "desc": "Description 1"
+                                "desc": "Description 1",
                             },
                             {
                                 "title": "Test Title 2",
                                 "url": "https://example.com",
-                                "desc": "Description 2"
-                            }
+                                "desc": "Description 2",
+                            },
                         ]
                     }
                 }

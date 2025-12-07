@@ -166,7 +166,9 @@ class ContextManager:
         messages = state["messages"]
 
         if not self.is_over_limit(messages):
-            logger.debug(f"Messages within limit ({self.count_tokens(messages)} <= {self.token_limit} tokens)")
+            logger.debug(
+                f"Messages within limit ({self.count_tokens(messages)} <= {self.token_limit} tokens)"
+            )
             return state
 
         # Compress messages
@@ -270,20 +272,22 @@ class ContextManager:
         pass
 
 
-def validate_message_content(messages: List[BaseMessage], max_content_length: int = 100000) -> List[BaseMessage]:
+def validate_message_content(
+    messages: List[BaseMessage], max_content_length: int = 100000
+) -> List[BaseMessage]:
     """
     Validate and fix all messages to ensure they have valid content before sending to LLM.
-    
+
     This function ensures:
     1. All messages have a content field
     2. No message has None or empty string content (except for legitimate empty responses)
     3. Complex objects (lists, dicts) are converted to JSON strings
     4. Content is truncated if too long to prevent token overflow
-    
+
     Args:
         messages: List of messages to validate
         max_content_length: Maximum allowed content length per message (default 100000)
-    
+
     Returns:
         List of validated messages with fixed content
     """
@@ -291,30 +295,40 @@ def validate_message_content(messages: List[BaseMessage], max_content_length: in
     for i, msg in enumerate(messages):
         try:
             # Check if message has content attribute
-            if not hasattr(msg, 'content'):
-                logger.warning(f"Message {i} ({type(msg).__name__}) has no content attribute")
+            if not hasattr(msg, "content"):
+                logger.warning(
+                    f"Message {i} ({type(msg).__name__}) has no content attribute"
+                )
                 msg.content = ""
-            
+
             # Handle None content
             elif msg.content is None:
-                logger.warning(f"Message {i} ({type(msg).__name__}) has None content, setting to empty string")
+                logger.warning(
+                    f"Message {i} ({type(msg).__name__}) has None content, setting to empty string"
+                )
                 msg.content = ""
-            
+
             # Handle complex content types (convert to JSON)
             elif isinstance(msg.content, (list, dict)):
-                logger.debug(f"Message {i} ({type(msg).__name__}) has complex content type {type(msg.content).__name__}, converting to JSON")
+                logger.debug(
+                    f"Message {i} ({type(msg).__name__}) has complex content type {type(msg.content).__name__}, converting to JSON"
+                )
                 msg.content = json.dumps(msg.content, ensure_ascii=False)
-            
+
             # Handle other non-string types
             elif not isinstance(msg.content, str):
-                logger.debug(f"Message {i} ({type(msg).__name__}) has non-string content type {type(msg.content).__name__}, converting to string")
+                logger.debug(
+                    f"Message {i} ({type(msg).__name__}) has non-string content type {type(msg.content).__name__}, converting to string"
+                )
                 msg.content = str(msg.content)
-            
+
             # Validate content length
             if isinstance(msg.content, str) and len(msg.content) > max_content_length:
-                logger.warning(f"Message {i} content truncated from {len(msg.content)} to {max_content_length} chars")
+                logger.warning(
+                    f"Message {i} content truncated from {len(msg.content)} to {max_content_length} chars"
+                )
                 msg.content = msg.content[:max_content_length].rstrip() + "..."
-            
+
             validated.append(msg)
         except Exception as e:
             logger.error(f"Error validating message {i}: {e}")
@@ -324,5 +338,5 @@ def validate_message_content(messages: List[BaseMessage], max_content_length: in
             else:
                 msg.content = f"[Error processing message: {str(e)}]"
             validated.append(msg)
-    
+
     return validated

@@ -22,10 +22,12 @@ logger = logging.getLogger(__name__)
 
 INFOQUEST_API_URL = "https://search.infoquest.bytepluses.com"
 
+
 def get_search_config():
     config = load_yaml_config("conf.yaml")
     search_config = config.get("SEARCH_ENGINE", {})
     return search_config
+
 
 class InfoQuestAPIWrapper(BaseModel):
     """Wrapper for InfoQuest Search API."""
@@ -73,29 +75,26 @@ class InfoQuestAPIWrapper(BaseModel):
             "Authorization": f"Bearer {self.infoquest_api_key.get_secret_value()}",
         }
 
-        params = {
-            "format": output_format,
-            "query": query
-        }
+        params = {"format": output_format, "query": query}
         if time_range > 0:
             params["time_range"] = time_range
-            logger.debug(f"InfoQuest - Applying time range filter: time_range_days={time_range}")
+            logger.debug(
+                f"InfoQuest - Applying time range filter: time_range_days={time_range}"
+            )
 
         if site != "":
             params["site"] = site
             logger.debug(f"InfoQuest - Applying site filter: site={site}")
 
-        response = requests.post(
-            f"{INFOQUEST_API_URL}",
-            headers=headers,
-            json=params
-        )
+        response = requests.post(f"{INFOQUEST_API_URL}", headers=headers, json=params)
         response.raise_for_status()
 
         # Print partial response for debugging
         response_json = response.json()
         if logger.isEnabledFor(logging.DEBUG):
-            response_sample = json.dumps(response_json)[:200] + ("..." if len(json.dumps(response_json)) > 200 else "")
+            response_sample = json.dumps(response_json)[:200] + (
+                "..." if len(json.dumps(response_json)) > 200 else ""
+            )
             logger.debug(
                 f"Search API request completed successfully | "
                 f"service=InfoQuest | "
@@ -124,6 +123,7 @@ class InfoQuestAPIWrapper(BaseModel):
                 f"has_site_filter={bool(site)} | "
                 f"request_type=async"
             )
+
         # Function to perform the API call
         async def fetch() -> str:
             headers = {
@@ -136,23 +136,30 @@ class InfoQuestAPIWrapper(BaseModel):
             }
             if time_range > 0:
                 params["time_range"] = time_range
-                logger.debug(f"Applying time range filter in async request: {time_range} days")
+                logger.debug(
+                    f"Applying time range filter in async request: {time_range} days"
+                )
             if site != "":
                 params["site"] = site
                 logger.debug(f"Applying site filter in async request: {site}")
 
             async with aiohttp.ClientSession(trust_env=True) as session:
-                async with session.post(f"{INFOQUEST_API_URL}", headers=headers, json=params) as res:
+                async with session.post(
+                    f"{INFOQUEST_API_URL}", headers=headers, json=params
+                ) as res:
                     if res.status == 200:
                         data = await res.text()
                         return data
                     else:
                         raise Exception(f"Error {res.status}: {res.reason}")
+
         results_json_str = await fetch()
 
         # Print partial response for debugging
         if logger.isEnabledFor(logging.DEBUG):
-            response_sample = results_json_str[:200] + ("..." if len(results_json_str) > 200 else "")
+            response_sample = results_json_str[:200] + (
+                "..." if len(results_json_str) > 200 else ""
+            )
             logger.debug(
                 f"Async search API request completed successfully | "
                 f"service=InfoQuest | "
@@ -174,7 +181,6 @@ class InfoQuestAPIWrapper(BaseModel):
         for content_list in raw_results:
             content = content_list["content"]
             results = content["results"]
-
 
             if results.get("organic"):
                 organic_results = results["organic"]

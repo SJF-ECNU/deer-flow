@@ -37,7 +37,10 @@ class TestReadabilityExtractor:
 
         # Assert
         assert article.title == "Test Article"
-        assert article.html_content == "<p>No content could be extracted from this page</p>"
+        assert (
+            article.html_content
+            == "<p>No content could be extracted from this page</p>"
+        )
 
     @patch("src.crawler.readability_extractor.simple_json_from_html_string")
     def test_extract_article_with_empty_content(self, mock_simple_json):
@@ -53,7 +56,10 @@ class TestReadabilityExtractor:
 
         # Assert
         assert article.title == "Test Article"
-        assert article.html_content == "<p>No content could be extracted from this page</p>"
+        assert (
+            article.html_content
+            == "<p>No content could be extracted from this page</p>"
+        )
 
     @patch("src.crawler.readability_extractor.simple_json_from_html_string")
     def test_extract_article_with_whitespace_only_content(self, mock_simple_json):
@@ -69,7 +75,10 @@ class TestReadabilityExtractor:
 
         # Assert
         assert article.title == "Test Article"
-        assert article.html_content == "<p>No content could be extracted from this page</p>"
+        assert (
+            article.html_content
+            == "<p>No content could be extracted from this page</p>"
+        )
 
     @patch("src.crawler.readability_extractor.simple_json_from_html_string")
     def test_extract_article_with_none_title(self, mock_simple_json):

@@ -42,7 +42,7 @@ def create_agent(
         f"Creating agent '{agent_name}' of type '{agent_type}' "
         f"with {len(tools)} tools and template '{prompt_template}'"
     )
-    
+
     # Wrap tools with interrupt logic if specified
     processed_tools = tools
     if interrupt_before_tools:
@@ -63,7 +63,7 @@ def create_agent(
         )
     llm_type = AGENT_LLM_MAP.get(agent_type, "basic")
     logger.debug(f"Agent '{agent_name}' using LLM type: {llm_type}")
-    
+
     logger.debug(f"Creating ReAct agent '{agent_name}' with locale: {locale}")
     # Use closure to capture locale from the workflow state instead of relying on
     # agent state.get("locale"), which doesn't have the locale field
@@ -78,5 +78,5 @@ def create_agent(
         pre_model_hook=pre_model_hook,
     )
     logger.info(f"Agent '{agent_name}' created successfully")
-    
+
     return agent

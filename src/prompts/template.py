@@ -32,8 +32,10 @@ def get_prompt_template(prompt_name: str, locale: str = "en-US") -> str:
     """
     try:
         # Normalize locale format
-        normalized_locale = locale.replace("-", "_") if locale and locale.strip() else "en_US"
-        
+        normalized_locale = (
+            locale.replace("-", "_") if locale and locale.strip() else "en_US"
+        )
+
         # Try locale-specific template first (e.g., researcher.zh_CN.md)
         try:
             template = env.get_template(f"{prompt_name}.{normalized_locale}.md")
@@ -43,11 +45,16 @@ def get_prompt_template(prompt_name: str, locale: str = "en-US") -> str:
             template = env.get_template(f"{prompt_name}.md")
             return template.render()
     except Exception as e:
-        raise ValueError(f"Error loading template {prompt_name} for locale {locale}: {e}")
+        raise ValueError(
+            f"Error loading template {prompt_name} for locale {locale}: {e}"
+        )
 
 
 def apply_prompt_template(
-    prompt_name: str, state: AgentState, configurable: Configuration = None, locale: str = "en-US"
+    prompt_name: str,
+    state: AgentState,
+    configurable: Configuration = None,
+    locale: str = "en-US",
 ) -> list:
     """
     Apply template variables to a prompt template and return formatted messages.
@@ -73,16 +80,20 @@ def apply_prompt_template(
 
     try:
         # Normalize locale format
-        normalized_locale = locale.replace("-", "_") if locale and locale.strip() else "en_US"
-        
+        normalized_locale = (
+            locale.replace("-", "_") if locale and locale.strip() else "en_US"
+        )
+
         # Try locale-specific template first
         try:
             template = env.get_template(f"{prompt_name}.{normalized_locale}.md")
         except TemplateNotFound:
             # Fallback to English template
             template = env.get_template(f"{prompt_name}.md")
-        
+
         system_prompt = template.render(**state_vars)
         return [{"role": "system", "content": system_prompt}] + state["messages"]
     except Exception as e:
-        raise ValueError(f"Error applying template {prompt_name} for locale {locale}: {e}")
+        raise ValueError(
+            f"Error applying template {prompt_name} for locale {locale}: {e}"
+        )

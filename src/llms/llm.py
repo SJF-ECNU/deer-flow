@@ -115,7 +115,7 @@ ALLOWED_LLM_CONFIG_KEYS = {
 class RateLimitedChatModel(BaseChatModel):
     """Wrapper that throttles requests before delegating to the LLM."""
 
-    model: BaseChatModel
+    model: Any
     rate_limiter: BaseRateLimiter
 
     model_config = ConfigDict(
@@ -280,9 +280,7 @@ def _get_env_llm_conf(llm_type: str) -> Dict[str, Any]:
     return conf
 
 
-def _coerce_positive_float(
-    value: Any, key: str, llm_type: str
-) -> float | None:
+def _coerce_positive_float(value: Any, key: str, llm_type: str) -> float | None:
     if value is None:
         return None
     try:
@@ -368,9 +366,7 @@ def _extract_rate_limit_config(
         or DEFAULT_RATE_LIMIT_REQUESTS_PER_SECOND,
         "check_every_n_seconds": check_every_n_seconds
         or DEFAULT_RATE_LIMIT_CHECK_INTERVAL,
-        "max_bucket_size": max(
-            max_bucket_size or DEFAULT_RATE_LIMIT_BUCKET_SIZE, 1.0
-        ),
+        "max_bucket_size": max(max_bucket_size or DEFAULT_RATE_LIMIT_BUCKET_SIZE, 1.0),
     }
 
 
@@ -422,7 +418,9 @@ def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> BaseChatMod
     # Filter out unexpected parameters to prevent LangChain warnings (Issue #411)
     # This prevents configuration keys like SEARCH_ENGINE from being passed to LLM constructors
     allowed_keys_lower = {k.lower() for k in ALLOWED_LLM_CONFIG_KEYS}
-    unexpected_keys = [key for key in merged_conf.keys() if key.lower() not in allowed_keys_lower]
+    unexpected_keys = [
+        key for key in merged_conf.keys() if key.lower() not in allowed_keys_lower
+    ]
     for key in unexpected_keys:
         merged_conf.pop(key)
         logger.warning(
@@ -581,24 +579,24 @@ def _infer_token_limit_from_model(model_name: str) -> int:
     """
     Infer a reasonable token limit from the model name.
     This helps protect against token overflow errors when token_limit is not explicitly configured.
-    
+
     Args:
         model_name: The model name from configuration
-        
+
     Returns:
         A conservative token limit based on known model capabilities
     """
     if not model_name:
         return 100000  # Safe default
-    
+
     model_name_lower = model_name.lower()
     defaults = _get_model_token_limit_defaults()
-    
+
     # Try exact or prefix matches
     for key, limit in defaults.items():
         if key in model_name_lower:
             return limit
-    
+
     # Return safe default if no match found
     return defaults["default"]
 
@@ -606,12 +604,12 @@ def _infer_token_limit_from_model(model_name: str) -> int:
 def get_llm_token_limit_by_type(llm_type: str) -> int:
     """
     Get the maximum token limit for a given LLM type.
-    
+
     Priority order:
     1. Explicitly configured token_limit in conf.yaml
     2. Inferred from model name based on known model capabilities
     3. Safe default (100,000 tokens)
-    
+
     This helps prevent token overflow errors (Issue #721) even when token_limit is not configured.
 
     Args:
@@ -625,19 +623,19 @@ def get_llm_token_limit_by_type(llm_type: str) -> int:
 
     conf = load_yaml_config(_get_config_file_path())
     model_config = conf.get(config_key, {})
-    
+
     # First priority: explicitly configured token_limit
     if "token_limit" in model_config:
         configured_limit = model_config["token_limit"]
         if configured_limit is not None:
             return configured_limit
-    
+
     # Second priority: infer from model name
     model_name = model_config.get("model")
     if model_name:
         inferred_limit = _infer_token_limit_from_model(model_name)
         return inferred_limit
-    
+
     # Fallback: safe default
     return _get_model_token_limit_defaults()["default"]
 

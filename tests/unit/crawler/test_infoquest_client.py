@@ -24,7 +24,7 @@ class TestInfoQuestClient:
         # Assert
         assert result == "<html><body>Test Content</body></html>"
         mock_post.assert_called_once()
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_json_response_with_reader_result(self, mock_post):
         # Arrange
@@ -33,7 +33,7 @@ class TestInfoQuestClient:
         json_data = {
             "reader_result": "<p>Extracted content from JSON</p>",
             "err_code": 0,
-            "err_msg": "success"
+            "err_msg": "success",
         }
         mock_response.text = json.dumps(json_data)
         mock_post.return_value = mock_response
@@ -45,7 +45,7 @@ class TestInfoQuestClient:
 
         # Assert
         assert result == "<p>Extracted content from JSON</p>"
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_json_response_with_content_fallback(self, mock_post):
         # Arrange
@@ -54,7 +54,7 @@ class TestInfoQuestClient:
         json_data = {
             "content": "<p>Content fallback from JSON</p>",
             "err_code": 0,
-            "err_msg": "success"
+            "err_msg": "success",
         }
         mock_response.text = json.dumps(json_data)
         mock_post.return_value = mock_response
@@ -66,7 +66,7 @@ class TestInfoQuestClient:
 
         # Assert
         assert result == "<p>Content fallback from JSON</p>"
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_json_response_without_expected_fields(self, mock_post):
         # Arrange
@@ -75,7 +75,7 @@ class TestInfoQuestClient:
         json_data = {
             "unexpected_field": "some value",
             "err_code": 0,
-            "err_msg": "success"
+            "err_msg": "success",
         }
         mock_response.text = json.dumps(json_data)
         mock_post.return_value = mock_response
@@ -87,7 +87,7 @@ class TestInfoQuestClient:
 
         # Assert
         assert result == json.dumps(json_data)
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_http_error(self, mock_post):
         # Arrange
@@ -104,7 +104,7 @@ class TestInfoQuestClient:
         # Assert
         assert result.startswith("Error:")
         assert "status 500" in result
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_empty_response(self, mock_post):
         # Arrange
@@ -121,7 +121,7 @@ class TestInfoQuestClient:
         # Assert
         assert result.startswith("Error:")
         assert "empty response" in result
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_whitespace_only_response(self, mock_post):
         # Arrange
@@ -138,7 +138,7 @@ class TestInfoQuestClient:
         # Assert
         assert result.startswith("Error:")
         assert "empty response" in result
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_not_found(self, mock_post):
         # Arrange
@@ -155,7 +155,7 @@ class TestInfoQuestClient:
         # Assert
         assert result.startswith("Error:")
         assert "status 404" in result
-    
+
     @patch.dict("os.environ", {}, clear=True)
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_without_api_key_logs_warning(self, mock_post):
@@ -172,7 +172,7 @@ class TestInfoQuestClient:
 
         # Assert
         assert result == "<html>Test</html>"
-    
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_with_timeout_parameters(self, mock_post):
         # Arrange
@@ -190,10 +190,10 @@ class TestInfoQuestClient:
         assert result == "<html>Test</html>"
         # Verify the post call was made with timeout parameters
         call_args = mock_post.call_args[1]
-        assert call_args['json']['fetch_time'] == 10
-        assert call_args['json']['timeout'] == 20
-        assert call_args['json']['navi_timeout'] == 30
-    
+        assert call_args["json"]["fetch_time"] == 10
+        assert call_args["json"]["timeout"] == 20
+        assert call_args["json"]["navi_timeout"] == 30
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_with_markdown_format(self, mock_post):
         # Arrange
@@ -211,8 +211,8 @@ class TestInfoQuestClient:
         assert result == "# Markdown Content"
         # Verify the format was set correctly
         call_args = mock_post.call_args[1]
-        assert call_args['json']['format'] == "markdown"
-    
+        assert call_args["json"]["format"] == "markdown"
+
     @patch("src.crawler.infoquest_client.requests.post")
     def test_crawl_exception_handling(self, mock_post):
         # Arrange

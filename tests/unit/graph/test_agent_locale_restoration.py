@@ -21,18 +21,18 @@ class TestAgentLocaleRestoration:
     def test_locale_lost_in_agent_subgraph(self):
         """
         Demonstrate the problem: agent subgraph filters out locale.
-        
+
         When create_react_agent creates a subgraph with MessagesState,
         it only returns messages, not custom fields.
         """
         # Simulate agent behavior: only returns messages
         initial_state = State(messages=[], locale="zh-CN")
-        
+
         # Agent subgraph returns (like MessagesState would)
         agent_result = {
             "messages": ["agent response"],
         }
-        
+
         # Problem: locale is missing
         assert "locale" not in agent_result
         assert agent_result.get("locale") is None
@@ -44,16 +44,16 @@ class TestAgentLocaleRestoration:
             locale="zh-CN",
             research_topic="test",
         )
-        
+
         # Simulate agent returning (MessagesState only)
         agent_result = {
             "messages": ["agent response"],
         }
-        
+
         # Apply restoration
         preserved = preserve_state_meta_fields(initial_state)
         agent_result.update(preserved)
-        
+
         # Verify restoration worked
         assert agent_result["locale"] == "zh-CN"
         assert agent_result["research_topic"] == "test"
@@ -72,11 +72,11 @@ class TestAgentLocaleRestoration:
             clarification_rounds=2,
             resources=["resource1"],
         )
-        
+
         # Agent result
         agent_result = {"messages": ["response"]}
         agent_result.update(preserve_state_meta_fields(initial_state))
-        
+
         # All fields should be restored
         assert agent_result["locale"] == "en-US"
         assert agent_result["research_topic"] == "Original Topic"
@@ -91,21 +91,21 @@ class TestAgentLocaleRestoration:
         """Test the complete cycle: state in → agent → state out."""
         # Initial state with zh-CN locale
         initial_state = State(messages=[], locale="zh-CN")
-        
+
         # Step 1: Extract meta fields
         preserved = preserve_state_meta_fields(initial_state)
         assert preserved["locale"] == "zh-CN"
-        
+
         # Step 2: Agent runs and returns only messages
         agent_result = {"messages": ["agent output"]}
         assert "locale" not in agent_result  # Missing!
-        
+
         # Step 3: Restore meta fields
         agent_result.update(preserved)
-        
+
         # Step 4: Verify locale is restored
         assert agent_result["locale"] == "zh-CN"
-        
+
         # Step 5: Create new state with restored fields
         final_state = State(messages=agent_result["messages"], **preserved)
         assert final_state.get("locale") == "zh-CN"
@@ -113,19 +113,19 @@ class TestAgentLocaleRestoration:
     def test_locale_not_auto_after_restoration(self):
         """
         Test that locale is NOT "auto" after restoration.
-        
+
         This tests the specific bug: locale was becoming "auto"
         instead of the preserved "zh-CN" value.
         """
         state = State(messages=[], locale="zh-CN")
-        
+
         # Agent returns without locale
         agent_result = {"messages": []}
-        
+
         # Before fix: locale would be "auto" (default behavior)
         # After fix: locale is preserved
         agent_result.update(preserve_state_meta_fields(state))
-        
+
         assert agent_result.get("locale") == "zh-CN"
         assert agent_result.get("locale") != "auto"
         assert agent_result.get("locale") is not None
@@ -133,27 +133,29 @@ class TestAgentLocaleRestoration:
     def test_chinese_locale_preserved(self):
         """Test that Chinese locale specifically is preserved."""
         locales_to_test = ["zh-CN", "zh", "zh-Hans", "zh-Hant"]
-        
+
         for locale_value in locales_to_test:
             state = State(messages=[], locale=locale_value)
             agent_result = {"messages": []}
-            
+
             agent_result.update(preserve_state_meta_fields(state))
-            
-            assert agent_result["locale"] == locale_value, f"Failed for locale: {locale_value}"
+
+            assert agent_result["locale"] == locale_value, (
+                f"Failed for locale: {locale_value}"
+            )
 
     def test_restoration_with_new_messages(self):
         """Test that restoration works even when agent adds new messages."""
         state = State(messages=[], locale="zh-CN", research_topic="research")
-        
+
         # Agent processes and returns new messages
         agent_result = {
             "messages": ["message1", "message2", "message3"],
         }
-        
+
         # Restore meta fields
         agent_result.update(preserve_state_meta_fields(state))
-        
+
         # Should have both new messages AND preserved meta fields
         assert len(agent_result["messages"]) == 3
         assert agent_result["locale"] == "zh-CN"
@@ -163,14 +165,14 @@ class TestAgentLocaleRestoration:
         """Test that restoring meta fields multiple times doesn't cause issues."""
         state = State(messages=[], locale="en-US")
         preserved = preserve_state_meta_fields(state)
-        
+
         agent_result = {"messages": []}
-        
+
         # Apply restoration multiple times
         agent_result.update(preserved)
         agent_result.update(preserved)
         agent_result.update(preserved)
-        
+
         # Should still have correct locale (not corrupted)
         assert agent_result["locale"] == "en-US"
         assert len(agent_result) == 9  # messages + 8 meta fields
@@ -182,7 +184,7 @@ class TestAgentLocaleRestorationScenarios:
     def test_researcher_agent_preserves_locale(self):
         """
         Simulate researcher agent execution preserving locale.
-        
+
         Scenario:
         1. Researcher node receives state with locale="zh-CN"
         2. Calls agent.ainvoke() which returns only messages
@@ -194,15 +196,15 @@ class TestAgentLocaleRestorationScenarios:
             locale="zh-CN",
             research_topic="生产1公斤牛肉需要多少升水？",
         )
-        
+
         # Agent executes and returns
         agent_result = {
             "messages": ["Researcher analysis of water usage..."],
         }
-        
+
         # Apply restoration (what the fix does)
         agent_result.update(preserve_state_meta_fields(state))
-        
+
         # Verify for next node
         assert agent_result["locale"] == "zh-CN"  # ✓ Preserved!
         assert agent_result.get("locale") != "auto"  # ✓ Not "auto"
@@ -210,32 +212,32 @@ class TestAgentLocaleRestorationScenarios:
     def test_coder_agent_preserves_locale(self):
         """Coder agent should also preserve locale."""
         state = State(messages=[], locale="en-US")
-        
+
         agent_result = {"messages": ["Code generation result"]}
         agent_result.update(preserve_state_meta_fields(state))
-        
+
         assert agent_result["locale"] == "en-US"
 
     def test_locale_persists_across_multiple_agents(self):
         """Test that locale persists through multiple agent calls."""
         locales = ["zh-CN", "en-US", "fr-FR"]
-        
+
         for locale in locales:
             # Initial state
             state = State(messages=[], locale=locale)
             preserved_1 = preserve_state_meta_fields(state)
-            
+
             # First agent
             result_1 = {"messages": ["agent1"]}
             result_1.update(preserved_1)
-            
+
             # Create state for second agent
             state_2 = State(messages=result_1["messages"], **preserved_1)
             preserved_2 = preserve_state_meta_fields(state_2)
-            
+
             # Second agent
             result_2 = {"messages": result_1["messages"] + ["agent2"]}
             result_2.update(preserved_2)
-            
+
             # Locale should persist
             assert result_2["locale"] == locale

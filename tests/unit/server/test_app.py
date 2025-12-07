@@ -969,9 +969,11 @@ class TestCreateInterruptEvent:
 
     def test_create_interrupt_event_without_id_attribute(self):
         """Test that _create_interrupt_event handles objects without 'id' attribute (backward compatibility)."""
+
         # Create a mock object that doesn't have 'id' attribute at all
         class MockInterrupt:
             pass
+
         mock_interrupt = MockInterrupt()
         mock_interrupt.value = "Waiting for approval"
 

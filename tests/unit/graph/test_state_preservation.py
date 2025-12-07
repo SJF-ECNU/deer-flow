@@ -171,9 +171,7 @@ class TestPreserveStateMetaFields:
 
     def test_preserve_empty_lists_preserved(self):
         """Test that empty lists are preserved correctly."""
-        state = State(
-            messages=[], clarification_history=[], resources=[]
-        )
+        state = State(messages=[], clarification_history=[], resources=[])
         preserved = preserve_state_meta_fields(state)
 
         assert preserved["clarification_history"] == []
@@ -238,7 +236,7 @@ class TestStatePreservationInCommand:
         }
 
         assert len(update_dict) >= 10  # 2 explicit + 8 preserved
-        assert update_dict["locale"] == "zh-CN" # overridden value
+        assert update_dict["locale"] == "zh-CN"  # overridden value
 
 
 class TestLocalePreservationSpecific:
@@ -253,9 +251,7 @@ class TestLocalePreservationSpecific:
         preserved_1 = preserve_state_meta_fields(initial_state)
 
         # Simulate state update from first node
-        updated_state_1 = State(
-            messages=[], **preserved_1
-        )
+        updated_state_1 = State(messages=[], **preserved_1)
 
         # Extract for second node transition
         preserved_2 = preserve_state_meta_fields(updated_state_1)

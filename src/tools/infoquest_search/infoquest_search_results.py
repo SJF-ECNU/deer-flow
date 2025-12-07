@@ -18,86 +18,88 @@ from src.tools.infoquest_search.infoquest_search_api import InfoQuestAPIWrapper
 
 logger = logging.getLogger(__name__)
 
+
 class InfoQuestInput(BaseModel):
     """Input for the InfoQuest tool."""
 
     query: str = Field(description="search query to look up")
 
+
 class InfoQuestSearchResults(BaseTool):
     """Tool that queries the InfoQuest Search API and returns processed results with images.
 
-Setup:
-    Install required packages and set environment variable ``INFOQUEST_API_KEY``.
+    Setup:
+        Install required packages and set environment variable ``INFOQUEST_API_KEY``.
 
-    .. code-block:: bash
+        .. code-block:: bash
 
-        pip install -U langchain-community aiohttp
-        export INFOQUEST_API_KEY="your-api-key"
+            pip install -U langchain-community aiohttp
+            export INFOQUEST_API_KEY="your-api-key"
 
-Instantiate:
-    .. code-block:: python
+    Instantiate:
+        .. code-block:: python
 
-        from your_module import InfoQuestSearch 
+            from your_module import InfoQuestSearch
 
-        tool = InfoQuestSearchResults(
-            output_format="json",
-            time_range=10,
-            site="nytimes.com"
-        )
+            tool = InfoQuestSearchResults(
+                output_format="json",
+                time_range=10,
+                site="nytimes.com"
+            )
 
-Invoke directly with args:
-    .. code-block:: python
+    Invoke directly with args:
+        .. code-block:: python
 
-        tool.invoke({
-            'query': 'who won the last french open'
-        })
+            tool.invoke({
+                'query': 'who won the last french open'
+            })
 
-    .. code-block:: json
+        .. code-block:: json
 
-        [
-            {
-                "type": "page",
-                "title": "Djokovic Claims French Open Title...",
-                "url": "https://www.nytimes.com/...",
-                "desc": "Novak Djokovic won the 2024 French Open by defeating Casper Ruud..."
-            },
-            {
-                "type": "news",
-                "time_frame": "2 days ago",
-                "title": "French Open Finals Recap",
-                "url": "https://www.nytimes.com/...",
-                "source": "New York Times"
-            },
-            {
-                "type": "image_url",
-                "image_url": {"url": "https://www.nytimes.com/.../djokovic.jpg"},
-                "image_description": "Novak Djokovic celebrating his French Open victory"
-            }
-        ]
+            [
+                {
+                    "type": "page",
+                    "title": "Djokovic Claims French Open Title...",
+                    "url": "https://www.nytimes.com/...",
+                    "desc": "Novak Djokovic won the 2024 French Open by defeating Casper Ruud..."
+                },
+                {
+                    "type": "news",
+                    "time_frame": "2 days ago",
+                    "title": "French Open Finals Recap",
+                    "url": "https://www.nytimes.com/...",
+                    "source": "New York Times"
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://www.nytimes.com/.../djokovic.jpg"},
+                    "image_description": "Novak Djokovic celebrating his French Open victory"
+                }
+            ]
 
-Invoke with tool call:
-    .. code-block:: python
+    Invoke with tool call:
+        .. code-block:: python
 
-        tool.invoke({
-            "args": {
-                'query': 'who won the last french open',
-            },
-            "type": "tool_call",
-            "id": "foo",
-            "name": "infoquest"
-        })
+            tool.invoke({
+                "args": {
+                    'query': 'who won the last french open',
+                },
+                "type": "tool_call",
+                "id": "foo",
+                "name": "infoquest"
+            })
 
-    .. code-block:: python
+        .. code-block:: python
 
-        ToolMessage(
-            content='[
-                {"type": "page", "title": "Djokovic Claims...", "url": "https://www.nytimes.com/...", "desc": "Novak Djokovic won..."},
-                {"type": "news", "time_frame": "2 days ago", "title": "French Open Finals...", "url": "https://www.nytimes.com/...", "source": "New York Times"},
-                {"type": "image_url", "image_url": {"url": "https://www.nytimes.com/.../djokovic.jpg"}, "image_description": "Novak Djokovic celebrating..."}
-            ]',
-            tool_call_id='1',
-            name='infoquest_search_results_json',
-        )
+            ToolMessage(
+                content='[
+                    {"type": "page", "title": "Djokovic Claims...", "url": "https://www.nytimes.com/...", "desc": "Novak Djokovic won..."},
+                    {"type": "news", "time_frame": "2 days ago", "title": "French Open Finals...", "url": "https://www.nytimes.com/...", "source": "New York Times"},
+                    {"type": "image_url", "image_url": {"url": "https://www.nytimes.com/.../djokovic.jpg"}, "image_description": "Novak Djokovic celebrating..."}
+                ]',
+                tool_call_id='1',
+                name='infoquest_search_results_json',
+            )
 
 
     """  # noqa: E501
@@ -143,11 +145,17 @@ Invoke with tool call:
             "🚀 BytePlus InfoQuest Search Initialization 🚀\n"
             "============================================"
         )
-        
+
         # Prepare initialization details
-        time_range_status = f"{self.time_range} days" if hasattr(self, 'time_range') and self.time_range > 0 else "Disabled"
-        site_filter = f"'{self.site}'" if hasattr(self, 'site') and self.site else "Disabled"
-        
+        time_range_status = (
+            f"{self.time_range} days"
+            if hasattr(self, "time_range") and self.time_range > 0
+            else "Disabled"
+        )
+        site_filter = (
+            f"'{self.site}'" if hasattr(self, "site") and self.site else "Disabled"
+        )
+
         initialization_details = (
             f"\n🔧 Tool Information:\n"
             f"├── Tool Name: {self.name}\n"
@@ -156,25 +164,27 @@ Invoke with tool call:
             f"📊 Configuration Summary:\n"
             f"├── Response Format: {self.response_format}\n"
         )
-        
+
         logger.info(initialization_details)
         logger.info("\n" + "*" * 70 + "\n")
 
     def _run(
-            self,
-            query: str,
-            run_manager: Optional[CallbackManagerForToolRun] = None,
+        self,
+        query: str,
+        run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Tuple[Union[List[Dict[str, str]], str], Dict]:
         """Use the tool."""
         try:
-            logger.debug(f"Executing search with parameters: time_range={self.time_range}, site={self.site}")
+            logger.debug(
+                f"Executing search with parameters: time_range={self.time_range}, site={self.site}"
+            )
             raw_results = self.api_wrapper.raw_results(
-                query,
-                self.time_range,
-                self.site
+                query, self.time_range, self.site
             )
             logger.debug("Processing raw search results")
-            cleaned_results = self.api_wrapper.clean_results_with_images(raw_results["results"])
+            cleaned_results = self.api_wrapper.clean_results_with_images(
+                raw_results["results"]
+            )
 
             result_json = json.dumps(cleaned_results, ensure_ascii=False)
 
@@ -186,17 +196,15 @@ Invoke with tool call:
             return result_json, raw_results
         except Exception as e:
             logger.error(
-                f"Search tool execution failed | "
-                f"mode=synchronous | "
-                f"error={str(e)}"
+                f"Search tool execution failed | mode=synchronous | error={str(e)}"
             )
             error_result = json.dumps({"error": repr(e)}, ensure_ascii=False)
             return error_result, {}
 
     async def _arun(
-            self,
-            query: str,
-            run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+        self,
+        query: str,
+        run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Tuple[Union[List[Dict[str, str]], str], Dict]:
         """Use the tool asynchronously."""
         if logger.isEnabledFor(logging.DEBUG):
@@ -207,16 +215,18 @@ Invoke with tool call:
                 f"query={query_truncated}"
             )
         try:
-            logger.debug(f"Executing async search with parameters: time_range={self.time_range}, site={self.site}")
+            logger.debug(
+                f"Executing async search with parameters: time_range={self.time_range}, site={self.site}"
+            )
 
             raw_results = await self.api_wrapper.raw_results_async(
-                query,
-                self.time_range,
-                self.site
+                query, self.time_range, self.site
             )
 
             logger.debug("Processing raw async search results")
-            cleaned_results = self.api_wrapper.clean_results_with_images(raw_results["results"])
+            cleaned_results = self.api_wrapper.clean_results_with_images(
+                raw_results["results"]
+            )
 
             result_json = json.dumps(cleaned_results, ensure_ascii=False)
 
@@ -229,9 +239,7 @@ Invoke with tool call:
             return result_json, raw_results
         except Exception as e:
             logger.error(
-                f"Search tool execution failed | "
-                f"mode=asynchronous | "
-                f"error={str(e)}"
+                f"Search tool execution failed | mode=asynchronous | error={str(e)}"
             )
             error_result = json.dumps({"error": repr(e)}, ensure_ascii=False)
             return error_result, {}

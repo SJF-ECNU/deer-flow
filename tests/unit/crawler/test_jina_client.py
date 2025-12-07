@@ -110,7 +110,7 @@ class TestJinaClient:
 
         # Assert
         assert result == "<html>Test</html>"
-    
+
     @patch("src.crawler.jina_client.requests.post")
     def test_crawl_exception_handling(self, mock_post):
         # Arrange

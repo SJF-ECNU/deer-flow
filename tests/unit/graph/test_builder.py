@@ -96,7 +96,7 @@ def test_build_base_graph_adds_nodes_and_edges(MockStateGraph):
     # Check that all nodes and edges are added
     assert mock_builder.add_edge.call_count >= 2
     assert mock_builder.add_node.call_count >= 8
-    # Now we have 1 conditional edges: research_team 
+    # Now we have 1 conditional edges: research_team
     assert mock_builder.add_conditional_edges.call_count == 1
 
 

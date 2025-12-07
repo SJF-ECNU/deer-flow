@@ -27,6 +27,7 @@ class CrawlerEngine(enum.Enum):
 # Tool configuration
 SELECTED_SEARCH_ENGINE = os.getenv("SEARCH_API", SearchEngine.TAVILY.value)
 
+
 class RAGProvider(enum.Enum):
     DIFY = "dify"
     RAGFLOW = "ragflow"

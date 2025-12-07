@@ -57,9 +57,9 @@ def sanitize_log_input(value: Any, max_length: int = 500) -> str:
     # Order matters: escape backslashes first to avoid double-escaping
     replacements = {
         "\\": "\\\\",  # Backslash (must be first)
-        "\n": "\\n",   # Newline - prevents creating new log entries
-        "\r": "\\r",   # Carriage return
-        "\t": "\\t",   # Tab
+        "\n": "\\n",  # Newline - prevents creating new log entries
+        "\r": "\\r",  # Carriage return
+        "\t": "\\t",  # Tab
         "\x00": "\\0",  # Null character
         "\x1b": "\\x1b",  # Escape character (used in ANSI sequences)
     }
@@ -178,9 +178,7 @@ def create_safe_log_message(template: str, **kwargs) -> str:
         True
     """
     # Sanitize all values
-    safe_kwargs = {
-        key: sanitize_log_input(value) for key, value in kwargs.items()
-    }
+    safe_kwargs = {key: sanitize_log_input(value) for key, value in kwargs.items()}
 
     # Substitute into template
     return template.format(**safe_kwargs)

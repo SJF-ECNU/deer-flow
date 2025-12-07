@@ -90,7 +90,7 @@ class TestSanitizeLogInput:
 
     def test_sanitize_complex_injection_attack(self):
         """Test complex multi-character injection attack."""
-        malicious = 'thread-123\n[WARNING] Unauthorized\r[ERROR] System failure\t[CRITICAL] Shutdown'
+        malicious = "thread-123\n[WARNING] Unauthorized\r[ERROR] System failure\t[CRITICAL] Shutdown"
         result = sanitize_log_input(malicious)
         # All dangerous characters should be escaped
         assert "\n" not in result
@@ -228,7 +228,7 @@ class TestLogInjectionAttackPrevention:
 
     def test_classic_log_injection_newline(self):
         """Test the classic log injection attack using newlines."""
-        attacker_input = 'abc\n[WARNING] Unauthorized access detected'
+        attacker_input = "abc\n[WARNING] Unauthorized access detected"
         result = sanitize_log_input(attacker_input)
         # The output should not contain an actual newline that would create a new log entry
         assert result.count("\n") == 0
@@ -254,7 +254,7 @@ class TestLogInjectionAttackPrevention:
 
     def test_multiple_injection_techniques(self):
         """Test prevention of multiple injection techniques combined."""
-        attack = 'id_1\n\r\t[CRITICAL]\x1b[31m RED TEXT'
+        attack = "id_1\n\r\t[CRITICAL]\x1b[31m RED TEXT"
         result = sanitize_log_input(attack)
         # No actual control characters should exist
         assert "\n" not in result

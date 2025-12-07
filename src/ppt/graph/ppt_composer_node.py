@@ -21,7 +21,11 @@ def ppt_composer_node(state: PPTState):
     model = get_llm_by_type(AGENT_LLM_MAP["ppt_composer"])
     ppt_content = model.invoke(
         [
-            SystemMessage(content=get_prompt_template("ppt/ppt_composer", locale=state.get("locale", "en-US"))),
+            SystemMessage(
+                content=get_prompt_template(
+                    "ppt/ppt_composer", locale=state.get("locale", "en-US")
+                )
+            ),
             HumanMessage(content=state["input"]),
         ],
     )

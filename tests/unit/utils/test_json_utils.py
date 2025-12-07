@@ -121,9 +121,9 @@ class TestExtractJsonFromContent:
 
     def test_json_with_extra_tokens_after_closing_bracket(self):
         """Test extracting JSON array with extra tokens"""
-        content = '[1, 2, 3] garbage data'
+        content = "[1, 2, 3] garbage data"
         result = _extract_json_from_content(content)
-        assert result == '[1, 2, 3]'
+        assert result == "[1, 2, 3]"
 
     def test_nested_json_with_extra_tokens(self):
         """Test nested JSON with extra tokens"""
@@ -151,26 +151,26 @@ class TestExtractJsonFromContent:
 
     def test_empty_object(self):
         """Test empty object"""
-        content = '{} extra'
+        content = "{} extra"
         result = _extract_json_from_content(content)
-        assert result == '{}'
+        assert result == "{}"
 
     def test_empty_array(self):
         """Test empty array"""
-        content = '[] more stuff'
+        content = "[] more stuff"
         result = _extract_json_from_content(content)
-        assert result == '[]'
+        assert result == "[]"
 
     def test_extra_closing_brace_no_opening(self):
         """Test that extra closing brace without opening is not marked as valid end"""
-        content = '} garbage data'
+        content = "} garbage data"
         result = _extract_json_from_content(content)
         # Should return original content since no opening brace was seen
         assert result == content
 
     def test_extra_closing_bracket_no_opening(self):
         """Test that extra closing bracket without opening is not marked as valid end"""
-        content = '] garbage data'
+        content = "] garbage data"
         result = _extract_json_from_content(content)
         # Should return original content since no opening bracket was seen
         assert result == content

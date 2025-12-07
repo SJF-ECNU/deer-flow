@@ -90,12 +90,12 @@ def test_get_llm_by_type_caches(monkeypatch, dummy_conf):
 def test_create_llm_filters_unexpected_keys(monkeypatch, caplog):
     """Test that unexpected configuration keys like SEARCH_ENGINE are filtered out (Issue #411)."""
     import logging
-    
+
     # Clear any existing environment variables that might interfere
     monkeypatch.delenv("BASIC_MODEL__API_KEY", raising=False)
     monkeypatch.delenv("BASIC_MODEL__BASE_URL", raising=False)
     monkeypatch.delenv("BASIC_MODEL__MODEL", raising=False)
-    
+
     # Config with unexpected keys that should be filtered
     conf_with_unexpected_keys = {
         "BASIC_MODEL": {
@@ -106,22 +106,52 @@ def test_create_llm_filters_unexpected_keys(monkeypatch, caplog):
             "engine": "tavily",  # Should be filtered
         }
     }
-    
+
     with caplog.at_level(logging.WARNING):
         result = llm._create_llm_use_conf("basic", conf_with_unexpected_keys)
-    
+
     # Verify the LLM was created
     assert isinstance(result, DummyChatOpenAI)
-    
+
     # Verify unexpected keys were not passed to the LLM
     assert "SEARCH_ENGINE" not in result.kwargs
     assert "engine" not in result.kwargs
-    
+
     # Verify valid keys were passed
     assert result.kwargs["api_key"] == "test_key"
     assert result.kwargs["base_url"] == "http://test"
     assert result.kwargs["model"] == "gpt-4"
-    
+
     # Verify warnings were logged
     assert any("SEARCH_ENGINE" in record.message for record in caplog.records)
     assert any("engine" in record.message for record in caplog.records)
+
+
+def test_rate_limiter_uses_env_defaults(monkeypatch, dummy_conf):
+    monkeypatch.setenv("RATE_LIMIT_DEFAULT_REQUESTS_PER_SECOND", "1.5")
+    monkeypatch.setenv("RATE_LIMIT_DEFAULT_BUCKET_SIZE", "2")
+    monkeypatch.setenv("RATE_LIMIT_DEFAULT_CHECK_INTERVAL", "0.2")
+    llm._rate_limiter_cache.clear()
+
+    result = llm._create_llm_use_conf("basic", dummy_conf)
+
+    assert isinstance(result, llm.RateLimitedChatModel)
+    limiter = result.rate_limiter
+    assert limiter.requests_per_second == 1.5
+    assert limiter.max_bucket_size == 2.0
+    assert limiter.check_every_n_seconds == 0.2
+
+
+def test_rate_limiter_can_be_disabled(monkeypatch, dummy_conf):
+    disabled_conf = {
+        **dummy_conf,
+        "BASIC_MODEL": {
+            **dummy_conf["BASIC_MODEL"],
+            "rate_limit_enabled": False,
+        },
+    }
+    llm._rate_limiter_cache.clear()
+
+    result = llm._create_llm_use_conf("basic", disabled_conf)
+
+    assert not isinstance(result, llm.RateLimitedChatModel)
