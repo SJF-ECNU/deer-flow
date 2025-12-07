@@ -13,6 +13,10 @@ BASIC_MODEL:
   # max_retries: 3 # Maximum number of retries for LLM calls
   # verify_ssl: false  # Uncomment this line to disable SSL certificate verification for self-signed certificates
   # token_limit: 200000 # Maximum input tokens for context compression (prevents token overflow errors)
+  # rate_limit_enabled: true # Set to false to turn off LangChain rate limiter
+  # rate_limit_requests_per_second: 3 # Smooths bursts to avoid provider throttling
+  # rate_limit_max_bucket_size: 3 # Controls allowed burst size before throttling kicks in
+  # rate_limit_check_every_n_seconds: 0.1 # How frequently to poll when waiting for a slot
 
 # Local model configuration example:
 
@@ -41,6 +45,10 @@ BASIC_MODEL:
 #   api_key: xxxx
 #   max_retries: 3 # Maximum number of retries for LLM calls
 #   token_limit: 150000 # Maximum input tokens for context compression
+#   rate_limit_enabled: true # Set to false to turn off LangChain rate limiter
+#   rate_limit_requests_per_second: 3 # Smooths bursts to avoid provider throttling
+#   rate_limit_max_bucket_size: 3 # Controls allowed burst size before throttling kicks in
+#   rate_limit_check_every_n_seconds: 0.1 # How frequently to poll when waiting for a slot
 
 
 # OTHER SETTINGS:
