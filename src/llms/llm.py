@@ -424,7 +424,7 @@ def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> BaseChatMod
     allowed_keys_lower = {k.lower() for k in ALLOWED_LLM_CONFIG_KEYS}
     unexpected_keys = [key for key in merged_conf.keys() if key.lower() not in allowed_keys_lower]
     for key in unexpected_keys:
-        removed_value = merged_conf.pop(key)
+        merged_conf.pop(key)
         logger.warning(
             "Removed unexpected LLM configuration key '%s'. "
             "This key is not a valid LLM parameter and may have been placed in "
