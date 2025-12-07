@@ -1,11 +1,11 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-import re
 import logging
+import re
 
-from src.config.tools import CrawlerEngine
 from src.config import load_yaml_config
+from src.config.tools import CrawlerEngine
 from src.crawler.article import Article
 from src.crawler.infoquest_client import InfoQuestClient
 from src.crawler.jina_client import JinaClient
